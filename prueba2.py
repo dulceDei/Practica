@@ -1,3 +1,7 @@
+# Streamlit app adaptada desde "preg2 (6).py"
+# Autor: Conversión a Streamlit por ChatGPT
+# Ejecuta:  streamlit run app_preg2.py
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -35,7 +39,6 @@ st.caption("Adaptación fiel del script original: mostrar/ocultar filas/columnas
 
 # ———————————————————————————————————————————————
 # a) Mostrar todas las filas del dataset, luego volver al estado inicial
-#    (en UI lo hacemos con un checkbox)
 # ———————————————————————————————————————————————
 st.header("a) Mostrar filas")
 mostrar_todas = st.checkbox("Mostrar todas las filas", value=False)
@@ -45,8 +48,7 @@ else:
     st.dataframe(df.head(25), use_container_width=True)
 
 # ———————————————————————————————————————————————
-# b) Mostrar todas las columnas del dataset; volver al estado inicial
-#    (checkbox que expande/contrae columnas)
+# b) Mostrar todas las columnas del dataset
 # ———————————————————————————————————————————————
 st.header("b) Mostrar columnas")
 with st.expander("Vista de columnas"):
@@ -69,7 +71,6 @@ filtrado = base.loc[base[D] > 2500]
 agr = filtrado.groupby("Country_Region").sum(numeric_only=True)
 orden = agr.sort_values(D)
 
-# Usamos chart integrado de Streamlit en vez de matplotlib
 if not orden.empty:
     st.line_chart(orden[[c for c in [C, R, A] if c in orden.columns]])
 
@@ -98,7 +99,14 @@ agg_latam = df[df[country_col].isin(sel)].groupby(country_col)[D].sum(numeric_on
 if agg_latam.sum() > 0:
     st.write("Participación de fallecidos")
     st.dataframe(agg_latam)
-    st.plotly_chart({"data": [{"type": "pie", "labels": agg_latam.index, "values": agg_latam.values}]})
+    # Intentar usar Plotly si está disponible; si no, caer a barra nativa
+    try:
+        import plotly.express as px  # type: ignore
+        fig = px.pie(values=agg_latam.values, names=agg_latam.index, title="Participación de fallecidos")
+        st.plotly_chart(fig, use_container_width=True)
+    except Exception:
+        st.warning("Plotly no está instalado en el entorno. Mostrando una barra como alternativa.")
+        st.bar_chart(agg_latam)
 else:
     st.warning("Sin datos para los países seleccionados")
 
@@ -107,7 +115,13 @@ else:
 # ———————————————————————————————————————————————
 st.header("f) Histograma de fallecidos por país")
 muertes_pais = df.groupby(country_col)[D].sum(numeric_only=True)
-st.bar_chart(muertes_pais)
+import matplotlib.pyplot as plt
+fig2, ax2 = plt.subplots()
+ax2.hist(muertes_pais.values, bins=20, edgecolor="black")
+ax2.set_xlabel("Fallecidos (suma por país)")
+ax2.set_ylabel("Frecuencia")
+ax2.set_title("Histograma")
+st.pyplot(fig2)
 
 # ———————————————————————————————————————————————
 # g) Boxplot de Confirmed, Deaths, Recovered, Active
@@ -116,7 +130,11 @@ st.header("g) Boxplot")
 cols_box = [c for c in [C, D, R, A] if c and c in df.columns]
 subset = df[cols_box].fillna(0)
 subset_plot = subset.head(25)
-st.box_chart(subset_plot)
+fig3, ax3 = plt.subplots()
+ax3.boxplot([subset_plot[c].tolist() for c in cols_box])
+ax3.set_xticklabels(cols_box)
+ax3.set_title("Boxplot – primeras 25 filas")
+st.pyplot(fig3)
 
 # ———————————————————————————————————————————————
 # Extra: info del DataFrame (texto, como hacía el script con prints)
