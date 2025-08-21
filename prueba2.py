@@ -1,7 +1,3 @@
-# Streamlit app adaptada desde "preg2 (6).py"
-# Autor: Conversión a Streamlit por ChatGPT
-# Ejecuta:  streamlit run app_preg2.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -115,13 +111,7 @@ else:
 # ———————————————————————————————————————————————
 st.header("f) Histograma de fallecidos por país")
 muertes_pais = df.groupby(country_col)[D].sum(numeric_only=True)
-import matplotlib.pyplot as plt
-fig2, ax2 = plt.subplots()
-ax2.hist(muertes_pais.values, bins=20, edgecolor="black")
-ax2.set_xlabel("Fallecidos (suma por país)")
-ax2.set_ylabel("Frecuencia")
-ax2.set_title("Histograma")
-st.pyplot(fig2)
+st.bar_chart(muertes_pais)
 
 # ———————————————————————————————————————————————
 # g) Boxplot de Confirmed, Deaths, Recovered, Active
@@ -130,11 +120,7 @@ st.header("g) Boxplot")
 cols_box = [c for c in [C, D, R, A] if c and c in df.columns]
 subset = df[cols_box].fillna(0)
 subset_plot = subset.head(25)
-fig3, ax3 = plt.subplots()
-ax3.boxplot([subset_plot[c].tolist() for c in cols_box])
-ax3.set_xticklabels(cols_box)
-ax3.set_title("Boxplot – primeras 25 filas")
-st.pyplot(fig3)
+st.box_chart(subset_plot)
 
 # ———————————————————————————————————————————————
 # Extra: info del DataFrame (texto, como hacía el script con prints)
