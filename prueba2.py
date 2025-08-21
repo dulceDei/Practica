@@ -1,7 +1,3 @@
-# Streamlit app adaptada desde "preg2 (6).py"
-# Autor: Conversión a Streamlit por ChatGPT
-# Ejecuta:  streamlit run app_preg2.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
