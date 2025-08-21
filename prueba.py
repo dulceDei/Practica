@@ -36,11 +36,23 @@ def safe_sum(df: pd.DataFrame, cols):
     cols = [c for c in cols if c in df.columns]
     return df.groupby("Country_Region", dropna=False)[cols].sum().sort_values(by=cols[0], ascending=False)
 
-def df_to_excel_bytes(df: pd.DataFrame, sheet="hoja1") -> bytes:
+def df_to_excel_bytes(df: pd.DataFrame, sheet="hoja1"):
+    """Devuelve (bytes, engine_usado). Si no hay motor Excel instalado, retorna (None, "none")."""
+    engine = "none"
+    # Intentar con openpyxl y luego con xlsxwriter
+    try:
+        import openpyxl  # noqa: F401
+        engine = "openpyxl"
+    except Exception:
+        try:
+            import xlsxwriter  # noqa: F401
+            engine = "xlsxwriter"
+        except Exception:
+            return None, engine
     bio = BytesIO()
-    with pd.ExcelWriter(bio, engine="openpyxl") as writer:
+    with pd.ExcelWriter(bio, engine=engine) as writer:
         df.to_excel(writer, sheet_name=sheet, index=False)
-    return bio.getvalue()
+    return bio.getvalue(), engine
 
 # ---------- Sidebar ----------
 st.sidebar.title("Opciones")
@@ -148,8 +160,22 @@ st.dataframe(df_g, use_container_width=True)
 
 # ---------- Guardar a Excel y descargar ----------
 st.subheader("Descargar la muestra en Excel")
-excel_bytes = df_to_excel_bytes(df_g, sheet="hoja1")
-st.download_button("Descargar Excel", data=excel_bytes, file_name="muestra.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+excel_bytes, engine_used = df_to_excel_bytes(df_g, sheet="hoja1")
+if excel_bytes:
+    st.download_button(
+        "Descargar Excel",
+        data=excel_bytes,
+        file_name="muestra.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    st.caption(f"Exportado con el motor: {engine_used}")
+else:
+    st.warning(
+        "No se encontró un motor de Excel (openpyxl/xlsxwriter) en el entorno. Habilitando descarga CSV como alternativa."
+    )
+# Alternativa universal: CSV
+csv_bytes = df_g.to_csv(index=False).encode()
+st.download_button("Descargar CSV", data=csv_bytes, file_name="muestra.csv", mime="text/csv")
 
 # ---------- Notas ----------
 with st.expander("Notas técnicas"):
