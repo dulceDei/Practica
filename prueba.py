@@ -1,9 +1,9 @@
 # app.py
-# Streamlit COVID-19 explorer
+# Streamlit COVID-19 explorer basado en el script "preg1 (7).py"
 import streamlit as st
 import pandas as pd
 import numpy as np
-from io import BytesIO
+from io import BytesIO, StringIO
 
 st.set_page_config(page_title="COVID-19 Explorer", layout="wide")
 
@@ -64,9 +64,9 @@ with c2:
     st.dataframe(df.tail(10), use_container_width=True)
 
 with st.expander("Información del dataset"):
-    buf = BytesIO()
-    df.info(buf=buf)
-    st.code(buf.getvalue().decode())
+    s_buf = StringIO()
+    df.info(buf=s_buf)
+    st.code(s_buf.getvalue())
 
 with st.expander("Conteo de faltantes por columna"):
     st.write(df.isna().sum())
