@@ -1,3 +1,7 @@
+# Streamlit app adaptada desde "preg2 (6).py"
+# Autor: Conversión a Streamlit por ChatGPT
+# Ejecuta:  streamlit run app_preg2.py
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -109,28 +113,12 @@ muertes_pais = df.groupby(country_col)[D].sum(numeric_only=True)
 st.bar_chart(muertes_pais)
 
 # ———————————————————————————————————————————————
-# g) Resumen tipo "boxplot" sin dependencias externas
+# g) Boxplot de Confirmed, Deaths, Recovered, Active (simulado con box_chart)
 # ———————————————————————————————————————————————
-st.header("g) Resumen tipo boxplot (sin dependencias externas)")
+st.header("g) Boxplot (simulado)")
 cols_box = [c for c in [C, D, R, A] if c and c in df.columns]
-subset = df[cols_box].fillna(0).head(25)
-
-# Tabla con min, Q1, mediana, Q3 y max por columna
-stats = subset.describe(percentiles=[0.25, 0.5, 0.75]).loc[["min", "25%", "50%", "75%", "max"]]
-st.subheader("Estadísticos (min, Q1, mediana, Q3, max)")
-st.dataframe(stats, use_container_width=True)
-
-# Histograma simple por columna seleccionada (para visualizar la distribución)
-col_sel = st.selectbox("Columna para ver distribución (histograma)", cols_box)
-bins = st.slider("# bins", 5, 40, 20)
-hist = pd.cut(subset[col_sel], bins=bins).value_counts().sort_index()
-st.bar_chart(hist)
-
-
-# ———————————————————————————————————————————————
-# Extra: info del DataFrame (texto, como hacía el script con prints)
-# ———————————————————————————————————————————————
-with st.expander("Información del DataFrame (df.info)"):
-    buf = StringIO()
-    df.info(buf=buf)
-    st.code(buf.getvalue())
+subset = df[cols_box].fillna(0)
+subset_plot = subset.head(25)
+# Streamlit no tiene boxplot nativo, así que mostramos estadísticas resumen en tabla
+st.write("Resumen estadístico (simulación de boxplot):")
+st.dataframe(subset_plot.describe().T)
