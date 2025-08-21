@@ -97,8 +97,8 @@ st.dataframe(by_country, use_container_width=True)
 
 c3, c4 = st.columns(2)
 with c3:
-    n_top = st.slider("Top N por confirmados", 5, 30, 10)
-    st.subheader("Top países por confirmados")
+    n_top = st.slider("Top N por casos confirmados", 5, 30, 10)
+    st.subheader("Top países por casos confirmados")
     st.bar_chart(by_country[confirmed].head(n_top))
 with c4:
     st.subheader("Top países por fallecidos")
