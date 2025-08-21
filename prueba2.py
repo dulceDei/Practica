@@ -109,13 +109,23 @@ muertes_pais = df.groupby(country_col)[D].sum(numeric_only=True)
 st.bar_chart(muertes_pais)
 
 # ———————————————————————————————————————————————
-# g) Boxplot de Confirmed, Deaths, Recovered, Active (simulado con box_chart)
+# g) Resumen tipo "boxplot" sin dependencias externas
 # ———————————————————————————————————————————————
-st.header("g) Boxplot (simulado)")
+st.header("g) Resumen tipo boxplot (sin dependencias externas)")
 cols_box = [c for c in [C, D, R, A] if c and c in df.columns]
-subset = df[cols_box].fillna(0)
-subset_plot = subset.head(25)
-st.box_chart(subset_plot)
+subset = df[cols_box].fillna(0).head(25)
+
+# Tabla con min, Q1, mediana, Q3 y max por columna
+stats = subset.describe(percentiles=[0.25, 0.5, 0.75]).loc[["min", "25%", "50%", "75%", "max"]]
+st.subheader("Estadísticos (min, Q1, mediana, Q3, max)")
+st.dataframe(stats, use_container_width=True)
+
+# Histograma simple por columna seleccionada (para visualizar la distribución)
+col_sel = st.selectbox("Columna para ver distribución (histograma)", cols_box)
+bins = st.slider("# bins", 5, 40, 20)
+hist = pd.cut(subset[col_sel], bins=bins).value_counts().sort_index()
+st.bar_chart(hist)
+
 
 # ———————————————————————————————————————————————
 # Extra: info del DataFrame (texto, como hacía el script con prints)
